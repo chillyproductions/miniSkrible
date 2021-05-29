@@ -10,22 +10,23 @@ export default function Menu(){
 
     async function join(){
         let id = idRef.current.value;
-        if(await Get(id)){
-            localStorage.setItem("name",nameRef.current.value);
-            history.push('/lobby/'+id);
+        if(nameRef.current.value){
+            if(await Get(id)){
+                sessionStorage.setItem("name",nameRef.current.value);
+                history.push('/lobby/'+id);
+            }
         }
-        //pop error
     }
 
     async function create(){
         let id = generateCode(5);
-        if(!await Get(id)){
-            await Create(id);
-            localStorage.setItem("name",nameRef.current.value);
-            history.push('/lobby/'+id);
+        if(nameRef.current.value){
+            if(!await Get(id)){
+                await Create(id);
+                sessionStorage.setItem("name",nameRef.current.value);
+                history.push('/lobby/'+id);
+            }
         }
-
-        //pop error
     }
 
     return(

@@ -16,16 +16,25 @@ io.on('connection', socket =>{
 
         players[socket.id] = data.id;
         
-        let newPlayer = {name: data.name, points: 0}
+        let newPlayer = {name: data.name, id: socket.id ,points: 0}
 
         lobbys[data.id].players.push(newPlayer);
 
         socket.to(data.id).emit("msg-recived", {name: data.name, msg:"connected"})
-        // socket.to(socket.id).emit("get-lobby", lobbys[data.id]);
     })
 
     socket.on('send-msg', data=>{
-        socket.to(players[socket.id]).emit("msg-recived", {name:data.name , msg:data.msg});
+        socket.to(players[socket.id]).emit("msg-recived", data);
+    })
+
+    socket.on('draw', data=>{
+        if(data.code == lobbys[players[socket.id]].painter)
+            socket.to(players[socket.id]).emit("draw", data.paint);
+    })
+
+    socket.on('clearDraw', (code)=>{
+        if(code == lobbys[players[socket.id]].painter)
+            socket.to(players[socket.id]).emit("clearDraw",{bong:"bong"});
     })
 
     io.on('disconnect', ()=>{
@@ -41,8 +50,18 @@ app.get('/check-lobby', (req,res)=>{
 })
 
 app.post('/create-Lobby', (req,res) =>{
-    lobbys[req.query.id] = {players:[],started:false}
-    res.send("ok");
+    let code = generateCode(5);
+    lobbys[req.query.id] = {players:[],started:false,painter:code}
+    res.send(code);
 })
+
+function generateCode(length) {
+    const characters ='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890';
+    let result = '';
+    for ( let i = 0; i < length; i++ ) 
+        result += characters.charAt(Math.floor(Math.random() * characters.length));
+
+    return result;
+}
 
 http.listen(3001);

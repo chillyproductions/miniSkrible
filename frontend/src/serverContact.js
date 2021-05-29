@@ -7,7 +7,10 @@ export async function Get(id){
 }
 
 export async function Create(id){
-    await fetch('http://localhost:3001/create-lobby/?id='+id,{
+    let rawRes = await fetch('http://localhost:3001/create-lobby/?id='+id,{
         method:"POST"
     })
+    let res = await rawRes.text();
+    sessionStorage.setItem("painterCode", res);
+    sessionStorage.setItem("painter", true);
 }

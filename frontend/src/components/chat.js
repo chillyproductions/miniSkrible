@@ -1,17 +1,18 @@
 import { useState , useRef, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { io } from 'socket.io-client';
 
 import './chat.css';
 
-const socket = io('http://localhost:3001/');
+var socket;
 
-export default function Chat(){
+export default function Chat(props){
     let {id} = useParams();
     const [messages, setMsg] = useMsg(id);
     const scrollRef = useRef();
 
     useEffect(()=>{
+        socket = props.socket;
+
         socket.on('msg-recived', data =>{
             setMsg(data);
             scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
@@ -48,7 +49,7 @@ function InputMessage(props){
 
     function sendMsg(){
         let inputValue = input.current.value;
-        socket.emit('send-msg', {msg:inputValue, name:localStorage.getItem("name")});
+        socket.emit('send-msg', {msg:inputValue, name:sessionStorage.getItem("name")});
         props.set({msg:inputValue,name:"you"});
         input.current.value = '';
     }
@@ -72,12 +73,8 @@ function InputMessage(props){
     )
 }
 
-function useMsg(id){
+function useMsg(){
     const [messages, setMsgs] = useState([]);
-
-    useEffect(()=>{ 
-        socket.emit('join-room', {id:id, name:localStorage.getItem("name")});
-    },[id]);
 
     function Set(data){
         setMsgs(msgs =>([...msgs,data]));
