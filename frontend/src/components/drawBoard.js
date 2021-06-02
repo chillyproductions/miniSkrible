@@ -1,5 +1,16 @@
 import {useEffect, useRef, useState} from 'react';
 
+import './css/drawBoard.css'
+import blackImg from './assets/blackbrush.png';
+import blueImg from './assets/bluebrush.png';
+import brownImg from './assets/brownbrush.png';
+import greenImg from './assets/greenbrush.png';
+import purpleImg from './assets/purplebrush.png';
+import redImg from './assets/redbrush.png';
+import yellowImg from './assets/yellowbrush.png';
+import eraserImg from './assets/eraser.png';
+import whiteBucketImg from './assets/whitebucket.png';
+
 var pxPerBlock;
 var socket;
 var ctx;
@@ -21,8 +32,11 @@ export default function DrawBoard(props){
         })
 
         ctx = canvasRef.current.getContext('2d');;
-        pxPerBlock = canvasRef.current.width / props.size;
     },[])
+
+    useEffect(()=>{
+        pxPerBlock = canvasRef.current.width / props.size;
+    },[props.size])
 
     function canvasDraw(e){
         if(sessionStorage.getItem("painter") == "true"){
@@ -46,15 +60,15 @@ export default function DrawBoard(props){
         <div>
             <canvas ref={canvasRef} onClick={(e)=>canvasDraw(e)} width="500" height="500" style={{border:"1px dashed black"}}></canvas>
             <div>
-                <button onClick={()=>changeColor('#000000')}>black</button>
-                <button onClick={()=>changeColor('#ff0000')}>red</button>
-                <button onClick={()=>changeColor('#0033cc')}>blue</button>
-                <button onClick={()=>changeColor('#00cc00')}>green</button>
-                <button onClick={()=>changeColor('#cccc00')}>yellow</button>
-                <button onClick={()=>changeColor('#9900cc')}>purple</button>
-                <button onClick={()=>changeColor('#663300')}>brown</button>
-                <button onClick={()=>changeColor('#ffffff')}>erase</button>
-                <button onClick={()=>eraseAll(canvasRef)}>ease all</button>
+                <button className="brushCover" onClick={()=>changeColor('#000000')}><img className="brush" src={blackImg} alt="black"></img></button>
+                <button className="brushCover" onClick={()=>changeColor('#0033cc')}><img className="brush" src={blueImg} alt="blue"></img></button>
+                <button className="brushCover" onClick={()=>changeColor('#663300')}><img className="brush" src={brownImg} alt="brown"></img></button>
+                <button className="brushCover" onClick={()=>changeColor('#00cc00')}><img className="brush" src={greenImg} alt="green"></img></button>
+                <button className="brushCover" onClick={()=>changeColor('#9900cc')}><img className="brush" src={purpleImg} alt="purple"></img></button>
+                <button className="brushCover" onClick={()=>changeColor('#ff0000')}><img className="brush" src={redImg} alt="red"></img></button>
+                <button className="brushCover" onClick={()=>changeColor('#cccc00')}><img className="brush" src={yellowImg} alt="yellow"></img></button>
+                <button className="brushCover" onClick={()=>changeColor('#ffffff')}><img className="brush" src={eraserImg} alt="erase"></img></button>
+                <button className="brushCover" onClick={()=>eraseAll(canvasRef)}><img className="brush" src={whiteBucketImg} alt="erase all"></img></button>
             </div>
         </div>
     )

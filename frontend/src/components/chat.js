@@ -1,7 +1,7 @@
 import { useState , useRef, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 
-import './chat.css';
+import './css/chat.css';
 
 var socket;
 
@@ -15,9 +15,12 @@ export default function Chat(props){
 
         socket.on('msg-recived', data =>{
             setMsg(data);
-            scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
         })
     },[]);
+
+    useEffect(()=>{
+        scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    },[scrollRef.current?.scrollHeight])
     
     return(
         <div className="chatCover">
@@ -25,9 +28,10 @@ export default function Chat(props){
             <div className="chat" ref={scrollRef}>
                 {messages.map((msg,msgIndex)=>(
                     <Message 
-                    name={msg.name}
+                    name={msg?.name}
                     msg={msg.msg}
-                    index={msgIndex}
+                    gameTalking={msg?.gameTalking}
+                    key={msgIndex}
                     ></Message>
                 ))}
             </div>
@@ -39,20 +43,24 @@ export default function Chat(props){
 }
 
 function Message(props){
-    return(
-        <div key={props.index}>{props.name}: {props.msg}</div>
-    )
+    if(props.gameTalking){
+        return(<div className="gameTalking">{props.msg}</div>)
+    }
+    else{
+        return(<div>{props.name}: {props.msg}</div>)
+    }
 }
 
 function InputMessage(props){
     const input = useRef();
 
-    function sendMsg(){
-        let inputValue = input.current.value;
-        socket.emit('send-msg', {msg:inputValue, name:sessionStorage.getItem("name")});
-        props.set({msg:inputValue,name:"you"});
-        input.current.value = '';
-    }
+        function sendMsg(){
+            let inputValue = input.current?.value;
+            socket.emit('send-msg', {msg:inputValue, name:sessionStorage.getItem("name")});
+            props.set({msg:inputValue,name:"you"});
+            if(input.current?.value)
+                input.current.value = '';
+        }
 
     useEffect(()=>{
         function send(key){
@@ -60,9 +68,9 @@ function InputMessage(props){
                 sendMsg();
             }
         }
-
-        window.addEventListener('keydown', key=> send(key));
-        return (window.removeEventListener('keydown', key=> send(key)))
+        
+        window.addEventListener('keydown', key=>send(key));
+        return window.removeEventListener('keydown', key=>send(key));
     },[]);
 
     return(
