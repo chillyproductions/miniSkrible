@@ -38,7 +38,7 @@ io.on('connection', socket =>{
                 for(player of lobbys[roomId].players){
                     if(player.id == socket.id){
                         player.guessedCorrectly = true;
-                        let timePassed = (new Date().getTime() - lobbys[roomId].startingTime) / (1000 * finalSizeFazeLength);
+                        let timePassed = (new Date().getTime() - lobbys[roomId].startingTime) / (finalSizeFazeLength);
                         player.score += Math.floor(200 * timePassed  + 50);
                         break;
                     }
