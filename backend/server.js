@@ -10,7 +10,7 @@ const io = require('socket.io')(http, {cors:{origin:'http://localhost:3000'}});
 app.use(cors({origin:'http://localhost:3000'}))
 app.use(express.static("build"));
 
-const startingDrawSize = 5;
+const startingDrawSize = 20;
 const firstSizeFaze = 20 * 1000;
 const secondSizeFaze = 45 * 1000 + firstSizeFaze;
 const finalSizeFazeLength = 45 * 1000 + secondSizeFaze;
@@ -140,8 +140,8 @@ io.on('connection', socket =>{
 
         updateSize(startingDrawSize);
         io.to(roomId).emit("clearDraw");
-        firstFazeTimeOut = setTimeout(()=>{updateSize(startingDrawSize * 4)},firstSizeFaze);
-        secondFazeTimeOut = setTimeout(()=>{updateSize(startingDrawSize * 4 * 4)},secondSizeFaze);
+        firstFazeTimeOut = setTimeout(()=>{updateSize(startingDrawSize * 2)},firstSizeFaze);
+        secondFazeTimeOut = setTimeout(()=>{updateSize(startingDrawSize * 4)},secondSizeFaze);
         finalFazeTimeOut = setTimeout(()=>{nextPainter(roomId)},finalSizeFazeLength)
 
         for(player of lobbys[roomId].players){
@@ -191,7 +191,7 @@ app.get("/", (req, res) => {
     res.sendFile(path.join(__dirname, "build", "index.html"));
 });
 
-http.listen(process.env.Port || 3001);
+http.listen(process.env.PORT || 3001);
 
 function generateCode(length) {
     const characters ='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890';

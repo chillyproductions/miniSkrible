@@ -11,6 +11,22 @@
 .logo {
   width: 550px;
   height: 120px;
+  margin-top: 25px;
+  animation-name: logo;
+  animation-duration: 4s;
+  animation-iteration-count: infinite;
+}
+
+@keyframes logo {
+  0% {
+    transform: rotate(-3deg);
+  }
+  50% {
+    transform: rotate(3deg);
+  }
+  100% {
+    transform: rotate(-3deg);
+  }
 }
 
 .menuCover {

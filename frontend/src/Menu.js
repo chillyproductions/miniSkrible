@@ -39,12 +39,13 @@ export default function Menu(){
     return(
         <div className="menu">
             <img className="logo" src={Logo} alt={"Logo"}></img>
-            <div className="menuCover" style={{display:'flex', flexDirection:'column'}}>
+            <div className="menuCover" style={{display: "flex", flexDirection: 'column'}}>
                 <input className="nameInput" ref={nameRef} placeholder="name"></input>
                 <button className="createButton" onClick={create}>Create</button>
                 <input className="idInput" type="text" ref={idRef} placeholder="lobby ID"></input>
                 <button className="joinButton" onClick={join}>Join</button>
             </div>
+            <label style={{color:'white'}}>By Nathan Reitblat</label>
         </div>
     )
 }
