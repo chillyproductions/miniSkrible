@@ -4,6 +4,20 @@
 }
 
 .brushCover {
-  width: 50px;
-  height: 50px;
+  width: 55px;
+  height: 55px;
+  background-color: white;
+  border: 0px;
+  margin-top: 6px;
+}
+
+.brushCover:hover {
+  border: 2px solid gold;
+  width: 63px;
+  height: 63px;
+  margin-top: 0;
+}
+
+.brushCover:active {
+  background-color: rgb(206, 178, 19);
 }

@@ -1,0 +1,8 @@
+.Person {
+  width: 100px;
+  height: 50px;
+}
+
+.guessedCorrectly {
+  background-color: rgb(2, 218, 2);
+}

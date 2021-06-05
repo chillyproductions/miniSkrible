@@ -1,5 +1,5 @@
 export async function Get(id){
-    let rawRes = await fetch('http://localhost:3001/check-lobby/?id='+id)
+    let rawRes = await fetch('/check-lobby/?id='+id)
     let res = await rawRes.text();
     if(res == "ok")
         return true;
@@ -7,7 +7,7 @@ export async function Get(id){
 }
 
 export async function Create(id){
-    let rawRes = await fetch('http://localhost:3001/create-lobby/?id='+id,{
+    let rawRes = await fetch('/create-lobby/?id='+id,{
         method:"POST"
     })
     let res = await rawRes.text();

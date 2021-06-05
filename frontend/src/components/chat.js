@@ -56,10 +56,14 @@ function InputMessage(props){
 
         function sendMsg(){
             let inputValue = input.current?.value;
+            if(!inputValue?.replace(" ",""))
+                return
+            
             socket.emit('send-msg', {msg:inputValue, name:sessionStorage.getItem("name")});
             props.set({msg:inputValue,name:"you"});
             if(input.current?.value)
                 input.current.value = '';
+            
         }
 
     useEffect(()=>{

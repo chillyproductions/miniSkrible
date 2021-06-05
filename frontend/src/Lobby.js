@@ -6,7 +6,7 @@ import {Get} from './serverContact.js';
 import PreGameLobby from './components/preGameLobby.js';
 import GameLobby from './components/gameLobby.js';
 
-const socket = io('http://localhost:3001');
+const socket = io();
 
 export default function Lobby(){
     const {id} = useParams();
@@ -22,6 +22,14 @@ export default function Lobby(){
         });
 
         socket.emit('join-room', {id:id, name:sessionStorage.getItem("name")});
+
+
+        function unload(){
+            sessionStorage.setItem('painter', false);
+            history.push('/');
+        }
+
+        return unload
     },[]);
 
     if(lobby){

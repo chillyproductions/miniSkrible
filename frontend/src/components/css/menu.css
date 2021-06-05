@@ -1,0 +1,46 @@
+.menu {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: rgb(24, 101, 243);
+  width: 100vw;
+  height: 100vh;
+}
+
+.logo {
+  width: 550px;
+  height: 120px;
+}
+
+.menuCover {
+  margin: 60px;
+  padding: 75px;
+  background-color: white;
+  border: 3px solid black;
+  border-radius: 25px;
+}
+
+.nameInput {
+  width: 500px;
+  font-size: 25px;
+}
+
+.createButton {
+  margin-top: 10px;
+  border-radius: 10px;
+  height: 40px;
+  background-color: orange;
+}
+
+.idInput {
+  margin-top: 20px;
+  font-size: 25px;
+}
+
+.joinButton {
+  margin-top: 10px;
+  border-radius: 10px;
+  height: 40px;
+  background-color: rgb(10, 194, 10);
+}

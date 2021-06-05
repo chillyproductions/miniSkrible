@@ -1,18 +1,29 @@
+const fs = require('fs');
 const cors = require('cors');
-const app = require('express')();
+const path = require('path');
+
+const express = require('express');
+const app = express();
 const http = require('http').Server(app);
 const io = require('socket.io')(http, {cors:{origin:'http://localhost:3000'}});
 
 app.use(cors({origin:'http://localhost:3000'}))
+app.use(express.static("build"));
 
-
-const firstSizeFaze = 5 * 1000;
-const secondSizeFaze = 5 * 1000 + firstSizeFaze;
-const thirdSizeFaze = 5 * 1000 + secondSizeFaze;
-const finalSizeFazeLength = 5 * 1000 + thirdSizeFaze 
+const startingDrawSize = 5;
+const firstSizeFaze = 20 * 1000;
+const secondSizeFaze = 45 * 1000 + firstSizeFaze;
+const finalSizeFazeLength = 45 * 1000 + secondSizeFaze;
+const words = JSON.parse(fs.readFileSync('./words.json', 'utf8'));
 
 var players = {};
 var lobbys = {};
+
+var firstFazeTimeOut;
+var secondFazeTimeOut;
+var finalFazeTimeOut;
+
+
 
 io.on('connection', socket =>{
     socket.on('join-room', data=>{
@@ -21,28 +32,41 @@ io.on('connection', socket =>{
         players[socket.id] = {room:data.id, name:data.name};
         
         let newPlayer = {name: data.name, id: socket.id, score: 0 , guessedCorrectly: false}
-
         lobbys[data.id].players.push(newPlayer);
 
         io.to(data.id).emit("msg-recived", {name: data.name, msg:"connected"});
         updateLobby(data.id);
+        if(lobbys[data.id].started){
+            io.to(socket.id).emit('new-drawing', {word:dashWord(lobbys[data.id].currentWord), time:lobbys[data.id].startingTime, roundTime:finalSizeFazeLength, name:"Some one"});
+        }
     })
 
-    socket.on('send-msg', data=>{
+    socket.on('send-msg', data=>{   
         const roomId = players[socket.id].room;
 
-        if(data.msg == lobbys[roomId].word){
+        if(data.msg == lobbys[roomId].currentWord){
             if(socket.id != lobbys[roomId].painter){
-                socket.to(roomId).emit("msg-recived", {msg: data.name + "guessed the word!", gameTalking:true});
+                io.to(roomId).emit("msg-recived", {msg: data.name + "guessed the word!", gameTalking:true});
                 
                 for(player of lobbys[roomId].players){
                     if(player.id == socket.id){
                         player.guessedCorrectly = true;
-                        let timePassed = (new Date().getTime() - lobbys[roomId].startingTime) / (finalSizeFazeLength);
+                        let timePassed = (finalSizeFazeLength - (new Date().getTime() - lobbys[roomId].startingTime)) / (finalSizeFazeLength);
                         player.score += Math.floor(200 * timePassed  + 50);
-                        break;
+                    }
+                    if(player.id == lobbys[roomId].painter){
+                        let timePassed = (finalSizeFazeLength - (new Date().getTime() - lobbys[roomId].startingTime)) / (finalSizeFazeLength * 2);
+                        player.score += Math.floor(200 * timePassed  + 50);
                     }
                 }
+
+                for(var i = 0; i < lobbys[roomId].players.length; i++)
+                    if(!lobbys[roomId].players[i].guessedCorrectly && lobbys[roomId].players[i].id != lobbys[roomId].painter)
+                        break;
+
+                if(i == lobbys[roomId].players.length)
+                    nextPainter(roomId);
+                
 
                 updateLobby(roomId);
             }
@@ -74,10 +98,18 @@ io.on('connection', socket =>{
     })
 
     function nextPainter(roomId){
+        if(!lobbys[roomId])
+            return
+
         const lobbyPlayers = lobbys[roomId].players;
-        for(var i = 0; lobbyPlayers[i].id != lobbys[roomId].painter && i < lobbyPlayers.length; i++){}
+
+        for(var i = 0; i < lobbyPlayers.length && lobbyPlayers[i].id != lobbys[roomId].painter; i++){}
+
+        if(!lobbyPlayers[(i+1)%(lobbyPlayers.length)])
+            return
 
         let newId = lobbyPlayers[(i+1)%(lobbyPlayers.length)].id;
+        let Name = lobbyPlayers[(i+1)%(lobbyPlayers.length)].name;
 
         io.to(lobbys[roomId].painter).emit('stop-painter');
 
@@ -85,30 +117,32 @@ io.on('connection', socket =>{
         lobbys[roomId].painterCode = newCode;
         lobbys[roomId].painter = newId;
         io.to(newId).emit('painter',newCode);
+        clearTimeout(firstFazeTimeOut);
+        clearTimeout(secondFazeTimeOut);
+        clearTimeout(finalFazeTimeOut);
 
-        newDrawing(newId);
+        newDrawing(newId,Name);
     }
-    
 
-    function newDrawing(id){
+    function newDrawing(id,Name){
         const roomId = players[id].room;
        
         function updateSize(size){
             io.to(roomId).emit('size-change',size);
-            io.to(roomId).emit("clearDraw");
         }
 
         const word = getWord();
         const dashedWord = dashWord(word);
         lobbys[roomId].currentWord = word;
-        io.to(roomId).emit('new-word',dashedWord);
-        io.to(id).emit('new-word', word);
-        updateSize(3);
-        setTimeout(()=>{updateSize(4)},firstSizeFaze);
-        setTimeout(()=>{updateSize(5)},secondSizeFaze);
-        setTimeout(()=>{updateSize(6)},thirdSizeFaze);
-        setTimeout(()=>{nextPainter(roomId)},finalSizeFazeLength)
         lobbys[roomId].startingTime = new Date().getTime();
+        io.to(roomId).emit('new-drawing', {word:dashedWord, time:new Date().getTime(), roundTime:finalSizeFazeLength, name:Name});
+        io.to(id).emit('new-drawing', {word:word, time:new Date().getTime(), roundTime:finalSizeFazeLength, name:Name});
+
+        updateSize(startingDrawSize);
+        io.to(roomId).emit("clearDraw");
+        firstFazeTimeOut = setTimeout(()=>{updateSize(startingDrawSize * 4)},firstSizeFaze);
+        secondFazeTimeOut = setTimeout(()=>{updateSize(startingDrawSize * 4 * 4)},secondSizeFaze);
+        finalFazeTimeOut = setTimeout(()=>{nextPainter(roomId)},finalSizeFazeLength)
 
         for(player of lobbys[roomId].players){
             player.guessedCorrectly = false;
@@ -124,13 +158,16 @@ io.on('connection', socket =>{
     }
 
     socket.on('disconnect', ()=>{
+        if(!players[socket.id])
+            return
+
         let lobbyPlayers = lobbys[players[socket.id].room].players;
         for(let i = 0; i < lobbyPlayers.length; i++)
             if(socket.id == lobbyPlayers[i].id)
                 lobbyPlayers.splice(i,1);
 
         if(lobbys[players[socket.id].room].painter == socket.id)
-            nextPainter();
+            nextPainter(players[socket.id].room);
         
         socket.to(players[socket.id].room).emit("msg-recived", {name: players[socket.id].name , msg:"disconected"});
         updateLobby(players[socket.id].room);
@@ -150,7 +187,11 @@ app.post('/create-Lobby', (req,res) =>{
     res.send(code);
 })
 
-http.listen(3001);
+app.get("/", (req, res) => {
+    res.sendFile(path.join(__dirname, "build", "index.html"));
+});
+
+http.listen(process.env.Port || 3001);
 
 function generateCode(length) {
     const characters ='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890';
@@ -162,7 +203,7 @@ function generateCode(length) {
 }
 
 function getWord(){
-    return "hello";
+    return words[Math.floor(Math.random() * words.length)];
 }
 
 function dashWord(word){

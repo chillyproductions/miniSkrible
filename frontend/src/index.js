@@ -4,6 +4,7 @@ import { BrowserRouter as Router, Switch, Route} from 'react-router-dom';
 
 import Lobby from './Lobby';
 import Menu from './Menu';
+// import DrawBoard from './components/drawBoard.js'
 
 ReactDOM.render(
   <Router>  

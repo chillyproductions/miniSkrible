@@ -1,12 +1,19 @@
-import { useRef } from 'react';
+import { useRef, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 
 import {Get, Create} from './serverContact.js';
+
+import Logo from './components/assets/rainbowLogo.png';
+import './components/css/menu.css';
 
 export default function Menu(){
     const history = useHistory();
     const idRef = useRef();
     const nameRef = useRef();
+
+    useEffect(()=>{
+        sessionStorage.setItem("painter", false);
+    },[])
 
     async function join(){
         let id = idRef.current.value;
@@ -30,11 +37,14 @@ export default function Menu(){
     }
 
     return(
-        <div style={{display:'flex', flexDirection:'column'}}>
-            <input ref={nameRef} placeholder="name"></input>
-            <button onClick={create}>Create</button>
-            <input type="text" ref={idRef} placeholder="lobby ID"></input>
-            <button onClick={join}>JOIN</button>
+        <div className="menu">
+            <img className="logo" src={Logo} alt={"Logo"}></img>
+            <div className="menuCover" style={{display:'flex', flexDirection:'column'}}>
+                <input className="nameInput" ref={nameRef} placeholder="name"></input>
+                <button className="createButton" onClick={create}>Create</button>
+                <input className="idInput" type="text" ref={idRef} placeholder="lobby ID"></input>
+                <button className="joinButton" onClick={join}>Join</button>
+            </div>
         </div>
     )
 }

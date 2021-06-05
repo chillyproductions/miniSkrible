@@ -15,17 +15,11 @@ export default function PreGameLobby(props){
         return true;
     }
 
-    useEffect(()=>{
-        props.socket.on('disconnect', ()=>{
-            sessionStorage.setItem("painter", false);
-          })
-    },[])
-
     return(
         <div style={{display:'flex'}}>
             <button onClick={start} disabled={canClick()}>START</button>
-            <PreLeaderBoard players={props.players}></PreLeaderBoard>
             <Chat socket={props.socket}></Chat>
+            <PreLeaderBoard players={props.players}></PreLeaderBoard>
         </div>
     )
 }
